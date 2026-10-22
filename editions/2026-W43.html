@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crypto Week in Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a weekly briefing. Masthead, week at a glance, numbers strip, then seven section panels, each a summary with a "See more" drawer. */
+/* Dark is the default; the header button switches to light and is remembered per viewer. */
+:root {
+  --bg: #0b1f1a; --panel: #123029; --fg: #e9f4f0; --muted: #a2c0b6; --line: #24483f;
+  --accent: #f2c35b; --accent-soft: #1b3d35;
+  --c-btc: #f7a642; --c-eth: #a4adff; --c-defi: #c99bf2; --c-alts: #ff9fc8; --c-reg: #f08a80; --c-stable: #6fd6e3; --c-disrupt: #e3d36b;
+  --font-display: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f6f7f9; --panel: #ffffff; --fg: #16202b; --muted: #5a6573; --line: #dde2e8;
+  --accent: #1d7a5c; --accent-soft: #e5f3ee;
+  --c-btc: #c4610a; --c-eth: #4652c9; --c-defi: #7a4fc2; --c-alts: #b8336f; --c-reg: #c23b3b; --c-stable: #1c7f8c; --c-disrupt: #8a7400;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  transition: background-color .2s ease, color .2s ease;
+}
+.mast-right { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.theme-btn { text-transform: none; }
+.theme-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+  display: grid; gap: 36px;
+}
+.mono { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .04em; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+
+/* Masthead */
+.mast { display: grid; gap: 14px; border-bottom: 2px solid var(--fg); padding-bottom: 22px; }
+.mast-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); text-transform: uppercase; }
+.mast h1 { font-size: clamp(36px, 6vw, 60px); font-weight: 800; letter-spacing: -.03em; }
+.mast h1 span { color: var(--accent); }
+.glance { font-size: 19px; max-width: 68ch; margin: 0; }
+.glance strong { font-weight: 600; }
+
+/* Numbers strip */
+.numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.num { background: var(--panel); padding: 16px 16px 14px; display: grid; gap: 4px; align-content: start; }
+.num b { font-family: var(--font-display); font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.num p { margin: 0; font-size: 14.5px; line-height: 1.4; color: var(--muted); }
+.num .tag { text-transform: uppercase; }
+
+/* Section header row */
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.bar h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip, .btn {
+  font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .03em;
+  border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+  padding: 7px 12px; border-radius: 999px; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.chip:hover, .btn:hover { border-color: var(--fg); }
+.chip:focus-visible, .btn:focus-visible, .more:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
+
+/* Topic panels */
+.topics { display: grid; gap: 20px; }
+.topic {
+  background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c);
+  padding: 22px clamp(16px, 3vw, 30px) 20px; display: grid; gap: 14px; scroll-margin-top: 16px;
+}
+.topic-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.topic h3 { font-size: clamp(24px, 3.4vw, 30px); font-weight: 700; letter-spacing: -.01em; }
+.pulse { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); text-transform: uppercase; }
+.bars { display: inline-flex; gap: 3px; align-items: flex-end; }
+.bars i { width: 5px; background: var(--line); border-radius: 1px; }
+.bars i:nth-child(1) { height: 7px; } .bars i:nth-child(2) { height: 11px; } .bars i:nth-child(3) { height: 15px; }
+.bars i.on { background: var(--c); }
+.summary { margin: 0; max-width: 70ch; font-size: 18px; }
+.keys { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; max-width: 75ch; }
+.keys li { display: grid; grid-template-columns: 74px 1fr; gap: 12px; font-size: 16px; line-height: 1.5; }
+.keys .when { color: var(--muted); padding-top: 3px; }
+.more {
+  justify-self: start; font-family: var(--font-display); font-weight: 500; font-size: 15px;
+  background: transparent; color: var(--c); border: 1.5px solid var(--c); border-radius: 6px;
+  padding: 8px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+}
+.more:hover { background: var(--c); color: var(--panel); }
+.more .arrow { transition: transform .2s ease; display: inline-block; }
+.more[aria-expanded="true"] .arrow { transform: rotate(180deg); }
+.deep { border-top: 1px dashed var(--line); padding-top: 18px; display: grid; gap: 18px; }
+.deep h4 { font-family: var(--font-display); font-size: 17px; margin: 0 0 6px; }
+.deep p { margin: 0; max-width: 72ch; font-size: 16.5px; }
+.deep ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 72ch; font-size: 16.5px; }
+.why { background: var(--accent-soft); padding: 14px 16px; border-left: 3px solid var(--c); }
+.why p { font-style: italic; }
+.sources { display: grid; gap: 6px; }
+.sources ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 14.5px; }
+.sources a { color: var(--accent); text-underline-offset: 2px; overflow-wrap: anywhere; }
+.sources .src-note { color: var(--muted); font-size: 13.5px; }
+
+/* Watch list and footer */
+.watch { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.watch div { border-top: 2px solid var(--fg); padding-top: 10px; font-size: 16px; }
+.watch .mono { color: var(--muted); display: block; margin-bottom: 4px; text-transform: uppercase; }
+footer { color: var(--muted); font-size: 14.5px; display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 18px; }
+footer p { margin: 0; max-width: 80ch; }
+
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+  .keys li { grid-template-columns: 1fr; gap: 0; }
+  .num b { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { .more .arrow { transition: none; } html { scroll-behavior: auto; } }
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="mast-top mono"><span id="edition-label">Edition 1 · Week 43, 2026</span><span class="mast-right"><span id="edition-range">Covering Oct 13 – Oct 22, 2026</span><button class="btn theme-btn" id="theme-btn" type="button" aria-label="Switch to light mode"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><span>Light</span></button></span></div>
+    <h1>Crypto Week <span>in Review</span></h1>
+    <p class="glance" id="glance"></p>
+  </header>
+
+  <section aria-labelledby="numbers-h" style="display:grid;gap:12px">
+    <div class="bar"><h2 id="numbers-h">Numbers of the week</h2></div>
+    <div class="numbers" id="numbers"></div>
+  </section>
+
+  <section aria-labelledby="topics-h" style="display:grid;gap:16px">
+    <div class="bar">
+      <h2 id="topics-h">This week, topic by topic</h2>
+      <div class="chips" id="nav"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end"><button class="btn" id="toggle-all" type="button">Expand all analyses</button></div>
+    <div class="topics" id="topics"></div>
+  </section>
+
+  <section aria-labelledby="watch-h" style="display:grid;gap:14px">
+    <div class="bar"><h2 id="watch-h">What to watch next week</h2></div>
+    <div class="watch" id="watch"></div>
+  </section>
+
+  <footer>
+    <p><strong>How this is made.</strong> Every Monday at 08:00 Lisbon time, Claude reads crypto newsrooms (CoinDesk, The Block, Decrypt, Blockworks), major outlets (Reuters, Bloomberg, Financial Times), regulator releases (SEC, CFTC, OCC, ESMA), project blogs (Ethereum Foundation, Solana) and market data (CoinGecko, Farside, SoSoValue, DefiLlama, RWA.xyz), then rewrites this page. Each analysis lists its sources. Nothing here is investment advice.</p>
+    <p>Items marked <em>(reported)</em> come from press reports the company has not confirmed. Some figures reached us through daily news digests that summarize the primary report; those digests are listed as the source so you can trace them.</p>
+  </footer>
+</div>
+
+<script>
+// Weekly content. Each edition replaces this object; the rendering code below stays the same.
+const EDITION = {
+  glance: "<strong>Rules moved faster than prices.</strong> Bitcoin spent the week between about $81,000 and $85,000 as oil above $110 a barrel weighed on risky assets, though US spot bitcoin ETFs had their best day in a month. Ether lagged, with its ETFs heading for their worst month of 2026. Regulators did most of the work: the OCC finalized the first federal GENIUS Act stablecoin rule, comments closed on the SEC's crypto exemption proposal, and Europe set a deadline for platforms to drop non-MiCA stablecoins. Solana switched on its Alpenglow upgrade, and privacy coins kept rallying.",
+  numbers: [
+    { v: "$526.7M", t: "US spot bitcoin ETF inflow on Oct 19, the biggest day since Sept 22", s: "btc" },
+    { v: "$1.08B", t: "Spot ether ETF outflows in October so far, the worst month of 2026", s: "eth" },
+    { v: "150 ms", t: "Solana transaction finality after Alpenglow, down from about 12.8 seconds", s: "alts" },
+    { v: "Jan 18", t: "Date the OCC's GENIUS Act stablecoin rule takes effect (2027)", s: "stable" },
+    { v: "Jan 8", t: "ESMA deadline for EU platforms to exit non-MiCA stablecoins (2027)", s: "reg" },
+    { v: "~$39B", t: "Tokenized real-world assets excluding stablecoins, up about 81% this year", s: "disrupt" }
+  ],
+  topics: [
+    {
+      id: "btc", name: "Bitcoin", c: "--c-btc", pulse: 2,
+      summary: "Bitcoin traded in a narrow band between about $81,000 and $85,000. Oil above $110 after attacks in Saudi Arabia and the Strait of Hormuz hurt risky assets, and bitcoin is still about 35% below its October 2025 record. Buyers returned on the dip: spot ETFs took in $526.7 million on Oct 19, and Strategy kept making small weekly purchases.",
+      keys: [
+        ["Oct 19", "US spot bitcoin ETFs draw $526.7M, led by BlackRock's IBIT with more than $665M in."],
+        ["Oct 19", "Strategy discloses its third October purchase: 267 BTC for about $22M, taking it to 848,517 BTC."],
+        ["Oct 21", "Bitcoin rises 2.4% to about $84,500 on a tech rally. JPMorgan adds bitcoin to its long-term forecasts for the first time."]
+      ],
+      deep: [
+        { h: "Price and macro", list: [
+          "Bitcoin opened Oct 20 at about $81,800, down 0.8% over a month and 24.7% over a year. The record is $128,198 (Oct 6, 2025).",
+          "Brent crude went above $111 a barrel, its highest since May. Analysts expect the Fed to hold rates at its October meeting.",
+          "On Oct 22 bitcoin was near $82,700, with about 59.5% of total crypto market value. The Fear & Greed index rose to 68."
+        ]},
+        { h: "ETF flows", list: [
+          "On Oct 19, IBIT took in more than $665M while Fidelity's FBTC lost $84M and Grayscale's GBTC lost $55M.",
+          "Even after that day, bitcoin ETFs were about $67M net negative for October. They are about $809M positive for 2026."
+        ]},
+        { h: "Companies and the network", list: [
+          "Strategy has spent about $73M on bitcoin in October and about $64B since August 2020. Its shares are down 11% this year.",
+          "JPMorgan's long-term forecasts now include bitcoin, with about 10% annual returns and high volatility expected.",
+          "Hashrate is near 1,027 exahashes per second. The next difficulty adjustment is expected to rise about 4.8%. Fees are 1 to 2 sat/vB."
+        ]}
+      ],
+      why: "Large investors are still buying bitcoin on dips through ETFs, but October flows are flat and oil, interest rates and stock markets are moving the price more than crypto news is. A clear break above $85,000 likely needs a calmer macro picture.",
+      sources: [
+        ["Yahoo Finance: Bitcoin and ether prices, Oct 20", "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-tuesday-october-20-2026-crypto-prices-slide-and-oil-costs-soar-as-mid-east-attacks-persist-114152288.html"],
+        ["Motley Fool: Crypto market today, Oct 21", "https://www.fool.com/coverage/stock-market-today/2026/10/21/crypto-market-today-oct-21-bitcoin-rebounds-on-tech-rally/"],
+        ["BeInCrypto: Bitcoin ETFs' biggest day since Sept 22", "https://beincrypto.com/bitcoin-etf-inflows-nearly-month-high/"],
+        ["Bitcoin Magazine: Strategy's third October buy", "https://bitcoinmagazine.com/news/strategy-third-october-bitcoin-buy"],
+        ["CryptoTicker: Bitcoin price, Oct 22", "https://cryptoticker.io/en/bitcoin-price-dominance-altcoin-pullback-22-october-2026"],
+        ["Farside Investors: Bitcoin ETF flow data", "https://farside.co.uk/btc/"]
+      ]
+    },
+    {
+      id: "eth", name: "Ethereum", c: "--c-eth", pulse: 2,
+      summary: "Ether underperformed bitcoin. It traded around $2,400 to $2,500, down about 10% in October and 18% this year, and US spot ether ETFs lost $1.08 billion this month. The roadmap moved forward anyway: the Ethereum Foundation scheduled the Glamsterdam upgrade on the Hoodi test network for Oct 26, and Interactive Brokers started offering ETH staking.",
+      keys: [
+        ["Oct 13", "Interactive Brokers launches ETH staking for clients through zerohash."],
+        ["Oct 16", "The Ethereum Foundation sets Glamsterdam for the Hoodi testnet on Oct 26 at 17:42 UTC."],
+        ["Oct 20", "Ether ETF outflows for October reach $1.08B, the largest monthly outflow of 2026."]
+      ],
+      deep: [
+        { h: "Glamsterdam, the next upgrade", list: [
+          "It adds enshrined proposer-builder separation (ePBS), block-level access lists and gas pricing changes.",
+          "It went live on the Sepolia testnet on Oct 6. Hoodi is the last major test before mainnet, which has no date yet.",
+          "The target gas limit is 200 million, against about 60 million today, which means much more room per block."
+        ]},
+        { h: "ETF flows", list: [
+          "Outflows ran for three straight weeks, including about $320M in the week to Oct 17. Oct 20 brought a small $26M inflow.",
+          "Spot ether ETFs hold about $14.98B, or 5% of ether's market value. BlackRock's ETHA holds $8.05B but lost $128M on Oct 19 and 20.",
+          "Year-to-date net inflows have shrunk to about $485M."
+        ]},
+        { h: "Price and ecosystem", p: "Ether is down about 40% over a year and about half below its August 2025 record of $4,954. Its share of total crypto value is about 10.7%. Vitalik Buterin published an experimental \"Paranoid Mode\" for private AI use that pays through Ethereum (see Disruptive projects)." }
+      ],
+      why: "The gap between Ethereum's technical progress and its price is widening. Glamsterdam would make the base chain far more capable, but institutions are currently choosing bitcoin. The Hoodi test on Oct 26 is the first real signal of when mainnet could follow.",
+      sources: [
+        ["Cryptopolitan: Ether ETFs lose $1.08B in October", "https://www.cryptopolitan.com/ether-etfs-lose-1-08b-october-2026/"],
+        ["Ad-hoc News: Hoodi testnet upgrade on Oct 26", "https://www.ad-hoc-news.de/boerse/news/marktberichte/hoodi-testnet-upgrade-on-october-26-2026-what-it-means-for-the-ethereum/70372505"],
+        ["P2P.org: DeFi Dispatch, October 2026", "https://p2p.org/economy/defi-dispatch-defi-news-october-2026-issue-1/"],
+        ["Motley Fool: Crypto market today, Oct 21 (ETHA flows)", "https://www.fool.com/coverage/stock-market-today/2026/10/21/crypto-market-today-oct-21-bitcoin-rebounds-on-tech-rally/"],
+        ["Yahoo Finance: Bitcoin and ether prices, Oct 20", "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-tuesday-october-20-2026-crypto-prices-slide-and-oil-costs-soar-as-mid-east-attacks-persist-114152288.html"]
+      ]
+    },
+    {
+      id: "defi", name: "DeFi", c: "--c-defi", pulse: 2,
+      summary: "A week without a major new hack, and lending is slowly recovering from April's $290 million KelpDAO exploit. Lending deposits are back to about $56 billion. New activity is in on-chain derivatives: binary options on Lighter, and 24/7 trading of a note linked to OpenAI on Ondo. The thief behind April's Drift hack started laundering funds again.",
+      keys: [
+        ["Oct 14", "DeFi lending deposits reach about $56B, up 55% from the July low. Aave is still 31% below its pre-KelpDAO level."],
+        ["Oct 21", "Lighter launches binary options. Ondo Perps lists OPAIPon, a private-market note linked to OpenAI."],
+        ["Oct 21", "The Drift exploiter moves about $61.5M in ETH into Tornado Cash after two months of silence (reported)."]
+      ],
+      deep: [
+        { h: "Recovery after KelpDAO", list: [
+          "Total DeFi deposits are about $96B, up 41% from the low. Aave holds about $18.2B.",
+          "In April, attackers spoofed KelpDAO's single cross-chain verifier on LayerZero and drained 116,500 rsETH. Aave's main markets briefly hit 100% use, so depositors could not withdraw.",
+          "LayerZero plans to launch its Zero mainnet on Nov 30."
+        ]},
+        { h: "Derivatives move on-chain", list: [
+          "Papertrade, built on Hyperliquid, reports $1.36T in cumulative trading volume on $335M of deposits. Traders lost about $63M, 86% of which went to PAPER token stakers.",
+          "Lighter added binary options and plans full options trading next.",
+          "Ondo's OPAIPon gives round-the-clock on-chain exposure to OpenAI's private valuation."
+        ]},
+        { h: "Security", p: "Drift, a Solana trading platform, lost more than $270M in April. Its exploiter's move to Tornado Cash is a reminder that 2026 losses to DeFi hacks are above $1.3B." }
+      ],
+      why: "DeFi is rebuilding trust after its worst year for hacks in some time. The growth now comes from leveraged trading and tokenized exposure to private companies, which is exactly the activity the CFTC is starting to write rules for.",
+      sources: [
+        ["P2P.org: DeFi Dispatch, October 2026", "https://p2p.org/economy/defi-dispatch-defi-news-october-2026-issue-1/"],
+        ["KuCoin: Crypto daily market report, Oct 21", "https://www.kucoin.com/news/articles/crypto-daily-market-report-october-21-2026"],
+        ["Crypto Times: Drift exploiter moves $61.5M to Tornado Cash", "https://www.cryptotimes.io/2026/10/21/drift-protocol-exploiter-moves-61-5m-in-eth-to-tornado-cash-after-2-months/"],
+        ["Sherwood News: KelpDAO hack and the $13B TVL drop (April)", "https://sherwood.news/crypto/kelpdao-290million-largest-defi-hack-2026/"],
+        ["crypto.news: DeFi has lost $1.3B to hacks in 2026", "https://crypto.news/defi-hacks-2026-billion-lost-same-attack-keeps-working/"],
+        ["DefiLlama: Hacks database", "https://defillama.com/hacks"]
+      ]
+    },
+    {
+      id: "alts", name: "Altcoins and other chains", c: "--c-alts", pulse: 3,
+      summary: "Solana switched on Alpenglow on Oct 21, cutting the time to confirm a transaction from about 12.8 seconds to about 150 milliseconds. Its price and ETFs did not react much. Ripple brought its RLUSD stablecoin into Cross River Bank's core systems. Privacy coins kept outperforming: Zcash rose 11.7% on Oct 21 and Monero 5.9% on Oct 22.",
+      keys: [
+        ["Oct 21", "Solana's Alpenglow upgrade goes live on mainnet at epoch 1064."],
+        ["Oct 15", "Cross River Bank adds Ripple's RLUSD as a payment rail next to ACH and wire transfers."],
+        ["Oct 22", "Monero rises 5.9% to about $612. Zcash trades near $1,290 to $1,350."]
+      ],
+      deep: [
+        { h: "Solana", list: [
+          "SOL trades around $105 to $108, down about 16% this year. It briefly touched $100 on Oct 15 and Oct 18.",
+          "Solana ETFs have seen outflows in every session since Oct 5, the largest $12.7M on Oct 16. They still hold $1.55B of net inflows since launch.",
+          "Validators had to run an Agave-based client for the switch. Rotor, the second phase of Alpenglow, has no date yet."
+        ]},
+        { h: "XRP and Ripple", list: [
+          "XRP hit a monthly low of $1.25 on Oct 18 and recovered to about $1.39 by Oct 21. XRP ETFs ended a 13-week run of inflows.",
+          "RLUSD is worth more than $2.5B, with over $1B issued on the XRP Ledger."
+        ]},
+        { h: "Privacy coins", p: "Zcash is up more than 700% this year after a record near $1,699 on Sept 26, helped by Grayscale's Zcash ETF (since Aug 25) and the NU7 upgrade, which brought 25-second blocks. Monero has no ETF and faces delisting pressure from exchanges, but rallied this week anyway." }
+      ],
+      why: "Speed (Solana) and privacy (Zcash and Monero) are the two altcoin stories with real momentum. Alpenglow puts Solana's confirmation times close to traditional payment systems, but ETF investors have not yet bought the story.",
+      sources: [
+        ["24/7 Wall St: Solana's Alpenglow upgrade is about to go live", "https://247wallst.com/investing/cryptocurrency/2026/10/20/solanas-alpenglow-upgrade-is-about-to-go-live-is-sol-a-better-buy-than-xrp/"],
+        ["Motley Fool: Crypto market today, Oct 21", "https://www.fool.com/coverage/stock-market-today/2026/10/21/crypto-market-today-oct-21-bitcoin-rebounds-on-tech-rally/"],
+        ["Crypto Briefing: Cross River brings RLUSD into core banking", "https://cryptobriefing.com/cross-river-bank-ripple-rlusd-integration/"],
+        ["CryptoTicker: Bitcoin and altcoins, Oct 22", "https://cryptoticker.io/en/bitcoin-price-dominance-altcoin-pullback-22-october-2026"],
+        ["Crypto Briefing: Zcash and Monero lead gains", "https://cryptobriefing.com/zcash-monero-lead-gains-bitcoin-flat/"]
+      ]
+    },
+    {
+      id: "reg", name: "Regulation and policy", c: "--c-reg", pulse: 3,
+      summary: "With the CLARITY Act stalled in the Senate, US agencies are writing the rules themselves. Comments closed on Oct 20 on the SEC's proposal to let crypto projects raise money under lighter rules, and the CFTC opened comments on retail leveraged crypto trading. In Europe, ESMA gave platforms until Jan 8, 2027 to stop offering stablecoins that do not comply with MiCA. South Korea says its digital asset law is nearly ready.",
+      keys: [
+        ["Oct 20", "Comments close on the SEC's Regulation Crypto Assets proposal, with fundraising exemptions and a safe harbor."],
+        ["Oct 14", "The OCC finds that many of the nine largest US banks restricted crypto firms. The SEC says four exchanges may list securities perpetual futures this quarter."],
+        ["Oct 22", "South Korea's financial regulator says the Digital Asset Basic Act will be introduced \"as soon as possible\"."]
+      ],
+      deep: [
+        { h: "United States", list: [
+          "The CLARITY Act, which would set the market structure for crypto, failed a Senate cloture vote 49 to 50 in September.",
+          "The SEC proposal would let projects raise up to $5M over four years, or up to $75M a year in two tiers, without full registration. A safe harbor would end securities treatment once a project's team finishes its promised work.",
+          "The CFTC's advance notice on retail leveraged crypto trading (Reg CTX and Reg CAM) was published Oct 13. Comments are due Dec 14.",
+          "Utah's attorney general sued the prediction market Kalshi (Oct 21)."
+        ]},
+        { h: "Europe", list: [
+          "ESMA's Oct 8 opinion says authorized platforms must stop serving EU clients with non-MiCA stablecoins. After Jan 8, 2027 only selling, converting or withdrawing is allowed.",
+          "The ECB plans a digital euro pilot in the second half of 2027."
+        ]},
+        { h: "Asia and elsewhere", list: [
+          "South Korea is discussing a rule that banks must own at least 50% plus one share of any won stablecoin issuer. Parliamentary review should start in November.",
+          "Kazakhstan obtained a court order restricting Coinbase, HTX and four other exchanges in its Astana financial center.",
+          "Google now requires licensing for crypto ads in the UAE (from Oct 21)."
+        ]}
+      ],
+      why: "US crypto policy now arrives through agency rules rather than laws. That is faster, but a future administration can reverse it more easily. Europe's stablecoin deadline will push the largest stablecoin issuers to choose between MiCA compliance and EU platforms.",
+      sources: [
+        ["TokenPost: SEC crypto rule proposal faces Oct 20 deadline", "https://www.tokenpost.com/news/regulation/35590"],
+        ["Troutman Pepper Locke: Digital assets newsletter, Oct 16", "https://www.troutman.com/insights/digital-assets-blockchain-newsletter-october-16-2026/"],
+        ["Altcoin Buzz: ESMA sets Jan 8, 2027 stablecoin deadline", "https://www.altcoinbuzz.io/esma-sets-8-january-2027-deadline-for-non-compliant-stablecoins"],
+        ["ESMA: Guidance on non-MiCA compliant stablecoins", "https://www.esma.europa.eu/press-news/esma-news/esma-and-european-commission-publish-guidance-non-mica-compliant-arts-and-emts"],
+        ["Tech Insider: South Korea crypto bill nears completion", "https://tech-insider.org/south-korea-crypto-bill-stablecoin-rules-2026"],
+        ["KuCoin: Crypto daily market report, Oct 21", "https://www.kucoin.com/news/articles/crypto-daily-market-report-october-21-2026"]
+      ]
+    },
+    {
+      id: "stable", name: "Stablecoins and payments", c: "--c-stable", pulse: 3,
+      summary: "The OCC published the first federal rule implementing the GENIUS Act on Oct 21. It takes effect Jan 18, 2027 and gives existing stablecoin rewards programs no automatic protection. Circle plans to take USDC into about 40 new, mostly emerging markets. Stablecoins in circulation are holding near $300 billion.",
+      keys: [
+        ["Oct 21", "The OCC finalizes its GENIUS Act rule for stablecoin issuers, effective Jan 18, 2027."],
+        ["Oct 16", "Circle says it will expand USDC to about 40 new markets in Asia, Latin America and the Middle East."],
+        ["Oct 15", "Ripple's RLUSD joins Cross River Bank's core payment systems."]
+      ],
+      deep: [
+        { h: "What the OCC rule says", list: [
+          "It sets how banks and trust companies under the OCC issue stablecoins, hold reserves and work with exchanges.",
+          "The law bans issuers from paying interest. The OCC will judge rewards case by case and stresses the law's word \"solely\": a reward paid partly for other reasons may be allowed.",
+          "Reserves follow principles rather than fixed lists, with a minimum of daily liquidity and limits on exposure to any single counterparty.",
+          "Anti-money-laundering rules will come from the Treasury. The FDIC and Federal Reserve rules are still in progress."
+        ]},
+        { h: "Market", list: [
+          "USDC has about $72.6B in circulation, roughly a quarter of the market. Tether's USDT has about 60%.",
+          "Circle is buying Singapore's Tazapay for $400M, which brings payment links in more than 100 markets. Circle's shares are down 33% over a year.",
+          "In India, USDT and USDC trade at premiums of 6.4% to 6.9% over the dollar, near record levels."
+        ]}
+      ],
+      why: "Whether stablecoin holders can earn rewards decides if stablecoins compete with bank deposits. The OCC left room for some rewards, which keeps that fight alive. Expect banks to push back before January.",
+      sources: [
+        ["CoinDesk: OCC's final rule on stablecoin rewards", "https://www.coindesk.com/policy/2026/10/21/occ-s-final-rule-to-start-fresh-in-weighing-stablecoin-rewards-against-genius-act-ban"],
+        ["Yahoo Finance: OCC finalizes GENIUS Act stablecoin rules", "https://finance.yahoo.com/markets/crypto/articles/occ-finalizes-genius-act-stablecoin-115223630.html"],
+        ["Yahoo Finance: Circle expands USDC to 40 new markets", "https://finance.yahoo.com/markets/crypto/articles/circle-expands-usdc-stablecoin-40-135600480.html"],
+        ["Crypto Times: India stablecoin premium near records", "https://www.cryptotimes.io/2026/10/21/india-stablecoin-premium-holds-near-records-usdt-usdc/"],
+        ["Mabonchain: Stablecoins hold near $300B", "https://mabonchain.com/news/stablecoin-market-q3-2026-usdc-tether/"]
+      ]
+    },
+    {
+      id: "disrupt", name: "Disruptive projects", c: "--c-disrupt", pulse: 2,
+      summary: "Tokenization and the meeting of crypto and AI led the week. Tokenized real-world assets reached about $39 billion, up about 81% this year, though trading in them is falling. Vitalik Buterin proposed a \"Paranoid Mode\" for using AI privately, paid through Ethereum. A tokenized note linked to OpenAI started trading on-chain around the clock.",
+      keys: [
+        ["Oct 13", "Tokenized real-world assets reach about $39B, excluding stablecoins (RWA Foundation)."],
+        ["Oct 16", "Vitalik Buterin proposes \"Paranoid Mode\": private AI requests routed over Tor and paid with zero-knowledge proofs."],
+        ["Oct 21", "Ondo lists OPAIPon, a note tracking OpenAI, for 24/7 on-chain trading."]
+      ],
+      deep: [
+        { h: "Tokenization", list: [
+          "About 6.1 million people hold tokenized assets, up 42% in a month. Stellar and BNB Chain account for about 62% of the growth.",
+          "Trading volume in tokenized assets on decentralized exchanges fell about 50% in 30 days, and BlackRock's BUIDL fund saw more than $600M of outflows.",
+          "OKX and ICE filed for a 24/7 venue for tokenized versions of 60+ US stocks under the SEC's Innovation Exemption."
+        ]},
+        { h: "Crypto meets AI", p: "Paranoid Mode combines four pieces: Tor routing, decoy requests, a local AI model that rewrites prompts before they leave the device, and zkAPI payment proofs funded in ETH or USDC. It is experimental, with no sign of wide use yet." },
+        { h: "Consumer and culture", list: [
+          "Yuga Labs launched Bored Ape trading cards on Solana: 2.4 million cards in 240,000 packs.",
+          "OpenSea opened its mobile app to everyone, with social trading features."
+        ]}
+      ],
+      why: "Moving traditional assets onto blockchains is the most durable trend in crypto right now. The open question is whether trading follows issuance: falling volumes say not yet.",
+      sources: [
+        ["Benzinga: Tokenized real-world assets reach $39B", "https://www.benzinga.com/Opinion/26/10/62321906/tokenized-real-world-assets-reach-39b-with-only-two-dominant-players"],
+        ["Zypto: This week in crypto, Oct 22", "https://zypto.com/blog/weekly-crypto-news/this-week-in-crypto-22-10-2026/"],
+        ["KuCoin: Crypto daily market report, Oct 21", "https://www.kucoin.com/news/articles/crypto-daily-market-report-october-21-2026"],
+        ["Troutman Pepper Locke: OKX and ICE tokenized venue filing", "https://www.troutman.com/insights/digital-assets-blockchain-newsletter-october-16-2026/"],
+        ["RWA.xyz: Tokenized asset data", "https://app.rwa.xyz/citations"]
+      ]
+    }
+  ],
+  watch: [
+    ["Ethereum", "Whether Glamsterdam runs cleanly on the Hoodi testnet on Oct 26, which would let developers pick a mainnet date."],
+    ["Macro", "The Fed's late-October decision and oil prices, which are moving bitcoin more than crypto news."],
+    ["Bitcoin ETFs", "Whether inflows continue and turn October positive (net about -$67M so far)."],
+    ["Regulation", "The SEC's next step after comments closed, and South Korea's bill reaching parliament in November."]
+  ]
+};
+
+// Sections always appear in alphabetical order
+EDITION.topics.sort((a, b) => a.name.localeCompare(b.name));
+const pulseLabel = ["", "Quiet week", "Active week", "Very active week"];
+const byId = Object.fromEntries(EDITION.topics.map(t => [t.id, t]));
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+
+document.getElementById("glance").innerHTML = EDITION.glance;
+
+const nums = document.getElementById("numbers");
+EDITION.numbers.forEach(n => {
+  const t = byId[n.s];
+  const box = el("div", "num");
+  box.style.setProperty("--c", `var(${t.c})`);
+  const tag = el("a", "mono tag");
+  tag.href = "#" + t.id; tag.style.color = `var(${t.c})`; tag.style.textDecoration = "none"; tag.textContent = t.name;
+  box.append(tag, el("b", null, n.v), el("p", null, n.t));
+  nums.append(box);
+});
+
+const nav = document.getElementById("nav");
+const topics = document.getElementById("topics");
+EDITION.topics.forEach(t => {
+  const chip = el("a", "chip");
+  chip.href = "#" + t.id; chip.style.setProperty("--c", `var(${t.c})`);
+  chip.append(el("span", "dot"), document.createTextNode(t.name));
+  nav.append(chip);
+
+  const art = el("article", "topic"); art.id = t.id;
+  art.style.setProperty("--c", `var(${t.c})`);
+  const head = el("div", "topic-head");
+  const pulse = el("span", "pulse mono");
+  const bars = el("span", "bars"); bars.setAttribute("aria-hidden", "true");
+  for (let i = 1; i <= 3; i++) { const b = el("i"); if (i <= t.pulse) b.className = "on"; bars.append(b); }
+  pulse.append(bars, document.createTextNode(pulseLabel[t.pulse]));
+  head.append(el("h3", null, t.name), pulse);
+
+  const keys = el("ul", "keys");
+  t.keys.forEach(([w, txt]) => { const li = el("li"); li.append(el("span", "when mono", w), el("span", null, txt)); keys.append(li); });
+
+  const btn = el("button", "more"); btn.type = "button";
+  btn.setAttribute("aria-expanded", "false"); btn.setAttribute("aria-controls", t.id + "-deep");
+  const label = el("span", null, "See more"); const arrow = el("span", "arrow", "▾"); arrow.setAttribute("aria-hidden", "true");
+  btn.append(label, arrow);
+
+  const deep = el("div", "deep"); deep.id = t.id + "-deep"; deep.hidden = true;
+  t.deep.forEach(d => {
+    const blk = el("div"); blk.append(el("h4", null, d.h));
+    if (d.p) blk.append(el("p", null, d.p));
+    if (d.list) { const ul = el("ul"); d.list.forEach(x => ul.append(el("li", null, x))); blk.append(ul); }
+    deep.append(blk);
+  });
+  const why = el("div", "why"); why.append(el("h4", null, "Why it matters"), el("p", null, t.why)); deep.append(why);
+  const src = el("div", "sources"); src.append(el("h4", null, "Sources"));
+  const ol = el("ol");
+  t.sources.forEach(([name, url]) => { const li = el("li"); const a = el("a", null, name); a.href = url; a.target = "_blank"; a.rel = "noopener"; li.append(a); ol.append(li); });
+  src.append(ol); deep.append(src);
+
+  btn.addEventListener("click", () => setOpen(t.id, deep.hidden));
+  art.append(head, el("p", "summary", t.summary), keys, btn, deep);
+  topics.append(art);
+});
+
+function setOpen(id, open) {
+  const deep = document.getElementById(id + "-deep");
+  const btn = document.querySelector(`[aria-controls="${id}-deep"]`);
+  deep.hidden = !open;
+  btn.setAttribute("aria-expanded", String(open));
+  btn.firstChild.textContent = open ? "Show less" : "See more";
+  syncAll();
+}
+const toggleAll = document.getElementById("toggle-all");
+function syncAll() {
+  const allOpen = EDITION.topics.every(t => !document.getElementById(t.id + "-deep").hidden);
+  toggleAll.textContent = allOpen ? "Collapse all analyses" : "Expand all analyses";
+}
+toggleAll.addEventListener("click", () => {
+  const allOpen = EDITION.topics.every(t => !document.getElementById(t.id + "-deep").hidden);
+  EDITION.topics.forEach(t => setOpen(t.id, !allOpen));
+});
+
+const watch = document.getElementById("watch");
+EDITION.watch.forEach(([k, v]) => { const d = el("div"); d.append(el("span", "mono", k), document.createTextNode(v)); watch.append(d); });
+
+// Light / dark toggle: dark by default, choice remembered in this browser only
+const themeBtn = document.getElementById("theme-btn");
+const sunIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const moonIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function applyTheme(mode) {
+  document.documentElement.setAttribute("data-theme", mode);
+  const next = mode === "dark" ? "light" : "dark";
+  themeBtn.innerHTML = (next === "light" ? sunIcon : moonIcon) + `<span>${next === "light" ? "Light" : "Dark"}</span>`;
+  themeBtn.setAttribute("aria-label", `Switch to ${next} mode`);
+}
+let savedTheme = "dark";
+try { savedTheme = localStorage.getItem("cryptoweekly-theme") || "dark"; } catch (e) {}
+applyTheme(savedTheme === "light" ? "light" : "dark");
+themeBtn.addEventListener("click", () => {
+  const mode = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  applyTheme(mode);
+  try { localStorage.setItem("cryptoweekly-theme", mode); } catch (e) {}
+});
+
+// Open a section's analysis when the link points at it
+const h = location.hash.slice(1);
+if (byId[h]) { setOpen(h, true); document.getElementById(h).scrollIntoView(); }
+</script>
+
+</body>
+</html>
